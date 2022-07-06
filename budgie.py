@@ -23,8 +23,13 @@ add_entry.add_argument("dr")
 add_entry.add_argument("amount")
 add_entry.add_argument("--who")
 add_entry.add_argument("--description")
+add_entry.add_argument("--tag", action="append", help="can be specified multiple times")
 
 list_entries = subparsers.add_parser("list_entries")
+
+
+add_tag = subparsers.add_parser("add_tag")
+add_tag.add_argument("tag")
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -54,8 +59,13 @@ if __name__ == "__main__":
             input["who"] = args.who
         if args.description:
             input["description"] = args.description
+        if args.tag:
+            input["tags"] = args.tag
         entry = EntrySchema().load(input)
         backend.add_entry(entry)
 
     if args.subcommand == "list_entries":
         pprint(EntrySchema(many=True).dump(backend.list_entries()))
+
+    if args.subcommand == "add_tag":
+        backend.create_tag(args.tag)

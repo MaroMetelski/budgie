@@ -28,6 +28,18 @@ class EntryModel(base):
     description = Column(String)
 
 
+class TagModel(base):
+    __tablename__ = "tags"
+    tag = Column(String, primary_key=True)
+
+
+class EntryTagModel(base):
+    __tablename__ = "entry_tag"
+    id = Column(Integer, primary_key=True)
+    entry_id = Column(Integer, ForeignKey(EntryModel.id))
+    tag = Column(String, ForeignKey(TagModel.tag))
+
+
 class PostgresStorageBackend(StorageBackend):
     def __init__(self):
         self.db = create_engine(DB_STRING)
@@ -44,11 +56,18 @@ class PostgresStorageBackend(StorageBackend):
         self.session.add(acc)
         self.session.commit()
 
+    def create_tag(self, tag: str):
+        tag = TagModel(
+            tag=tag,
+        )
+        self.session.add(tag)
+        self.session.commit()
+
     def delete_account(self, account_name: str):
         pass
 
     def add_entry(self, entry):
-        entry = EntryModel(
+        entry_m = EntryModel(
             who=entry.who,
             when=entry.when,
             credit_account=entry.credit_account,
@@ -56,7 +75,16 @@ class PostgresStorageBackend(StorageBackend):
             amount=entry.amount,
             description=entry.description,
         )
-        self.session.add(entry)
+        self.session.add(entry_m)
+        # for getting the id
+        self.session.flush()
+        for tag_name in entry.tags:
+            tag = EntryTagModel(
+                entry_id=entry_m.id,
+                tag=tag_name,
+            )
+            self.session.add(tag)
+
         self.session.commit()
 
     def delete_entry(self, entry_name: str):

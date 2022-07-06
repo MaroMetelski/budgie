@@ -12,7 +12,14 @@ class Account:
 
 class Entry:
     def __init__(
-        self, when, credit_account, debit_account, amount, who="", description=""
+        self,
+        when,
+        credit_account,
+        debit_account,
+        amount,
+        who="",
+        description="",
+        tags=[],
     ):
         self.when = when
         self.credit_account = credit_account
@@ -20,6 +27,7 @@ class Entry:
         self.amount = amount
         self.who = who
         self.description = description
+        self.tags = tags
 
 
 class AccountSchema(Schema):
@@ -45,6 +53,7 @@ class EntrySchema(Schema):
     amount = fields.Number(required=True)
     who = fields.Str()
     description = fields.Str()
+    tags = fields.List(fields.Str)
 
     @post_load
     def make_entry(self, data, **kwargs):
